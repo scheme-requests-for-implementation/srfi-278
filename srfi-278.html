@@ -157,7 +157,7 @@ SPDX-License-Identifier: MIT
           </ul>
       </li>
       <li><a href="#mixed-arithmetic"> Provisions for mixed arithmetic</a></li>
-      <li><a href="#exact-transcendental"> Special exact values for trancendental functions</a></li>
+      <li><a href="#exact-transcendental"> Special exact values for transcendental functions</a></li>
     </ul>
   </li>
   <li><a href="#implementation"> Implementation</a></li>
@@ -258,7 +258,7 @@ SPDX-License-Identifier: MIT
   The procedures
   <a href="#nonpositivep"><code>nonpositive?</code></a>,
   <a href="#nonnegativep"><code>nonnegative?</code></a>,
-  <a href="#nonnegativep"><code>nonnegative?</code></a>
+  <a href="#nonzerop"><code>nonzero?</code></a>
   are procedures that are negations of the corresponding procedures without
   <code>non</code>, but will still always return <code>#f</code> when passed
   a NaN. Finally, the procedure <a href="#sign-negativep"><code>sign-negative?</code></a>
@@ -512,6 +512,9 @@ Stricter numeric tower</h4>
   <code>(= 1 (denominator <var>obj</var>))</code>.
 </p>
 
+<h4 id="order-predicates"><a href="#order-predicates"></a>
+Predicates related to order</h4>
+
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
 <code class="signature">(<a href="#sign-negativep" id="sign-negativep"
@@ -526,11 +529,9 @@ Stricter numeric tower</h4>
 <p>
   For non-NaN values, this procedure returns <code>#t</code> if the
   number is less than zero, or if the number is negative zero. If the
-  value is a NaN, the returned boolean is implemetation-defined.
+  value is a NaN, the returned boolean is implementation-defined.
 </p>
 
-<h4 id="order-predicates"><a href="#order-predicates"></a>
-Predicates related to order</h4>
 
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
@@ -545,7 +546,7 @@ Predicates related to order</h4>
 <p>
   Determine if two real numbers are <dfn>ordered</dfn>. Two real
   numbers are ordered if neither is a NaN. If two numbers are not
-  ordrered, they are <dfn>unordered</dfn>.
+  ordered, they are <dfn>unordered</dfn>.
 </p>
 
 
@@ -664,7 +665,7 @@ Extensions to <span class="report-name">R<sup>7</sup>RS</span> procedures</h4>
 <p>
   This procedure is like <code>rationalize</code> in the
   <span class="report-name">R<sup>7</sup>RS</span>. When
-  <var>delta-lower</var> and <var>delta-upper</var> is specified,
+  <var>delta-lower</var> and <var>delta-upper</var> are specified,
   then the simplest rational between <var>x</var>&minus;|<var>delta-lower</var>|
   and <var>x</var>+|<var>delta-higher</var>| is returned.
 </p>
@@ -725,7 +726,7 @@ Functions returning exact integers</h4>
 <p>It is an error if <var>n</var> is not an exact integer.</p>
 
 <p>
-  Returns two exact integers, <var>s</var> and <var>r</var>
+  Returns two nonnegative exact integers, <var>s</var> and <var>r</var>
   such that
   <var>k</var>= <var>s</var><sup><var>n</var></sup> + <var>r</var>
   and <var>k</var> &lt; (<var>s</var> + 1)<sup>n</sup>.
@@ -741,10 +742,10 @@ Functions returning exact integers</h4>
 </div>
 
 <p>It is an error if <var>b</var> is not an exact integer greater than 1.
-It is an error if <var>k</var> is zero.</p>
+It is an error if <var>k</var> is not positive.</p>
 
 <p>
-  Returns two exact integers, <var>s</var> and <var>r</var>
+  Returns two nonnegative exact integers, <var>s</var> and <var>r</var>
   such that
   <var>k</var>=<var>b</var><sup><var>s</var></sup> + <var>r</var>
   and <var>k</var> &lt; <var>b</var><sup><var>s</var> + 1</sup>.
@@ -813,8 +814,8 @@ It is an error if <var>k</var> is zero.</p>
 <p>
 The value of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>log</mi><mo>⁡</mo><mi>z</mi></mrow></math> for non-real <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mi>z</mi></math> is defined in terms of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mi>log</mi></math> as </p>
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>log</mi><mo>⁡</mo><mi>z</mi><mo>=</mo><mi>log</mi><mo>⁡</mo><mrow><mo>|</mo><mi>z</mi><mo>|</mo></mrow><mo>+</mo><mrow><mo>(</mo><mi>angle</mi><mo>⁡</mo><mi>z</mi><mo>)</mo></mrow><mo>⁢</mo><mi>i</mi></mrow></math><p>
-where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>angle</mi><mo>⁡</mo><mi>z</mi></mrow></math> is the angle of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>z</mi><mo>=</mo><mi>a</mi><mo>⁢</mo><msup><mi>e</mi><mrow><mi>i</mi><mo>⁢</mo><mi>θ</mi></mrow></msup></mrow></math> specified as </p>
-<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>angle</mi><mo>⁡</mo><mi>z</mi><mo>=</mo><mi>b</mi><mo>+</mo><mn>2</mn><mo>⁢</mo><mi>i</mi><mo>⁢</mo><mi>n</mi></mrow></math><p>
+where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>angle</mi><mo>⁡</mo><mi>z</mi></mrow></math> is the phase of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>z</mi><mo>=</mo><mi>a</mi><mo>⁢</mo><msup><mi>e</mi><mrow><mi>π</mi><mo>⁢</mo><mi>θ</mi></mrow></msup></mrow></math> specified as </p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>angle</mi><mo>⁡</mo><mi>z</mi><mo>=</mo><mi>θ</mi><mo>+</mo><mn>2</mn><mo>⁢</mo><mi>i</mi><mo>⁢</mo><mi>n</mi></mrow></math><p>
 with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mi>n</mi></math> chosen such that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo>−</mo><mo>⁢</mo><mi>π</mi><mo>≤</mo><mo>angle</mo><mo>⁡</mo><mo>z</mo><mo>≤</mo><mi>π</mi></mrow></math>.
 When zero is unsigned, the principal expression for angle is
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo>−</mo><mo>⁢</mo><mi>π</mi><mo>&lt;</mo><mo>angle</mo><mo>⁡</mo><mo>z</mo><mo>≤</mo><mi>π</mi></mrow></math>.
@@ -867,7 +868,8 @@ go according to the following formulæ:</p>
 
 <p>
   Some implementations of mixed real-complex arithmetic are not implemented
-  such that the following identities are followed:
+  in a way that preserves some important mathematical properties of complex
+  numbers. For example, the following identities may not work:
 </p>
 
 <pre
@@ -885,7 +887,7 @@ go according to the following formulæ:</p>
 <li>Support for mixed exactness complex numbers. These are complex numbers
     with exact real parts and inexact imaginary parts, or inexact
     real parts and exact imaginary parts.</li>
-<li><code>(* 0 <var>z</var>) ⇒ 0 </code>.</li>
+<li><code>(* 0 <var>z</var>) ⇒ 0</code>.</li>
 <li><code>(/ 0 <var>z</var>) ⇒ 0</code>.</li>
 <li><code>(+ 0 <var>z</var>) ⇒ <var>z</var></code>.</li>
 <li>Make
@@ -908,7 +910,7 @@ go according to the following formulæ:</p>
   would have instead evaluated to <code>+inf.0+nan.0i</code>.
 </p>
 
-<h3 id="exact-transcendental"><a href="#exact-transcendental"></a> Special exact values for trancendental functions</h3>
+<h3 id="exact-transcendental"><a href="#exact-transcendental"></a> Special exact values for transcendental functions</h3>
 
 <p>
   Implementations <strong>should</strong> return exact results for the
