@@ -145,7 +145,17 @@ SPDX-License-Identifier: MIT
   <li>
     <a href="#specification"> Specification</a>
     <ul>
-      <li><a href="#library"> Library</a></li>
+      <li><a href="#library"> Library</a>
+          <ul>
+          <li><a href="#misc-procedures">Miscellaneous procedures</a></li>
+          <li><a href="#stricter-numeric-tower">Stricter numeric tower</a></li>
+
+          <li><a href="#order-predicates">Predicates related to order</a></li>
+          <li><a href="#extensions-r7rs">Extensions to <span class="report-name">R<sup>7</sup>RS</span> procedures</a></li>
+          <li><a href="#exact-integer-functions">Functions returning exact integers</a></li>
+          <li><a href="#hyperbolic">Hyperbolic functions</a></li>
+          </ul>
+      </li>
       <li><a href="#mixed-arithmetic"> Provisions for mixed arithmetic</a></li>
       <li><a href="#exact-transcendental"> Special exact values for trancendental functions</a></li>
     </ul>
@@ -377,6 +387,9 @@ SPDX-License-Identifier: MIT
   <a href="#atanh"><code>atanh</code></a>
 </p>
 
+<h4 id="misc-procedures"><a href="#misc-procedures"></a>
+Miscellaneous procedures</h4>
+
 <div class="feature" id="conjugate">
 <span class="category">(srfi 278)<br>procedure</span>
 <code class="signature">(<a href="#conjugate">conjugate</a> <var>z</var>)</code>
@@ -423,6 +436,9 @@ SPDX-License-Identifier: MIT
 <code class="example-code">(round-away 3.6)</code> ⇒ 4.0
 <code class="example-code">(round-away 3.5)</code> ⇒ 4.0
 <code class="example-code">(round-away 3.4)</code> ⇒ 3.0</pre>
+
+<h4 id="stricter-numeric-tower"><a href="#stricter-numeric-tower"></a>
+Stricter numeric tower</h4>
 
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
@@ -498,6 +514,102 @@ SPDX-License-Identifier: MIT
 
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
+<code class="signature">(<a href="#sign-negativep" id="sign-negativep"
+                         >sign-negative?</a> <var>x</var>)</code>
+</div>
+
+<p>
+  Returns <code>#t</code> if the number has a negative sign and
+  <code>#f</code> otherwise.
+</p>
+
+<p>
+  For non-NaN values, this procedure returns <code>#t</code> if the
+  number is less than zero, or if the number is negative zero. If the
+  value is a NaN, the returned boolean is implemetation-defined.
+</p>
+
+<h4 id="order-predicates"><a href="#order-predicates"></a>
+Predicates related to order</h4>
+
+<div class="feature">
+<span class="category">(srfi 278)<br>procedure</span>
+<code class="signature">(<a href="#orderedp" id="orderedp"
+                         >ordered?</a> <var>x<sub>1</sub></var>
+                                       <var>x<sub>2</sub></var>)</code><br>
+<code class="signature">(<a href="#unorderedp" id="unorderedp"
+                         >unordered?</a> <var>x<sub>1</sub></var>
+                                       <var>x<sub>2</sub></var>)</code>
+</div>
+
+<p>
+  Determine if two real numbers are <dfn>ordered</dfn>. Two real
+  numbers are ordered if neither is a NaN. If two numbers are not
+  ordrered, they are <dfn>unordered</dfn>.
+</p>
+
+
+<div class="feature">
+<span class="category">(srfi 278)<br>procedure</span>
+<code class="signature">(<a href="#neqp" id="neqp"
+                         >!=</a> <var>z<sub>1</sub></var> <var>z<sub>2</sub></var> <var>z<sub>3</sub></var>…)</code>
+</div>
+
+<p>
+  Returns <code>#t</code> if there exists two arguments in the argument
+  list that are not equal.
+</p>
+
+<p>
+  If any argument is a NaN, the
+  procedure returns false, even if all arguments are NaNs that are
+  <code>eqv?</code>. Hence over real numbers, this predicate is
+  ordered.
+</p>
+
+<div class="boxed">
+<p>
+  <span class="boxed-tag">Note</span>: Because of the handling of NaNs,
+  <code>(!= <var>x</var> <var>y</var>)</code> is not necessarily
+  equivalent to <code>(not (= <var>x</var> <var>y</var>))</code>.
+</p>
+</div>
+
+<div class="feature">
+<span class="category">(srfi 278)<br>procedure</span>
+<code class="signature">(<a href="#nonnegativep" id="nonnegativep"
+                        >nonnegative?</a> <var>x</var>)</code><br>
+<code class="signature">(<a href="#nonpositivep" id="nonpositivep"
+                        >nonpositive?</a> <var>x</var>)</code><br>
+<code class="signature">(<a href="#nonzerop" id="nonzerop"
+                        >nonzero?</a> <var>z</var>)</code><br>
+</div>
+
+<p>
+  These procedures are predicates around zero. They return
+  <code>#t</code> if the number <var>x</var> is an ordered number
+  that is not negative, not positive, and not zero respectively.
+  Definitions of these procedures could be
+</p>
+
+<pre
+>(define (nonnegative? x)
+  (&gt;= x 0))
+(define (nonpositive? x)
+  (&lt;= x 0))
+(define (nonzero? x)
+  (!= x 0))</pre>
+
+<p>
+  These predicates are ordered: passing a NaN to these procedures always
+  returns false.
+</p>
+
+<h4 id="extensions-r7rs"><a href="#extensions-r7rs"></a>
+Extensions to <span class="report-name">R<sup>7</sup>RS</span> procedures</h4>
+
+<div class="feature">
+<span class="category">(srfi 278)<br>procedure</span>
 <code class="signature">(<a href="#exact-integerp" id="exact-integerp"
                         >exact-integer?</a> <var>obj</var>)</code><br>
 <code class="signature">(<a href="#nanp" id="nanp"
@@ -521,85 +633,6 @@ SPDX-License-Identifier: MIT
 </p>
 </div>
 
-<div class="feature">
-<span class="category">(srfi 278)<br>procedure</span>
-<code class="signature">(<a href="#orderedp" id="orderedp"
-                         >ordered?</a> <var>x<sub>1</sub></var>
-                                       <var>x<sub>2</sub></var>)</code><br>
-<code class="signature">(<a href="#unorderedp" id="unorderedp"
-                         >unordered?</a> <var>x<sub>1</sub></var>
-                                       <var>x<sub>2</sub></var>)</code>
-</div>
-
-<p>
-  Determine if two real numbers are <dfn>ordered</dfn>. Two real
-  numbers are ordered if neither is a NaN. If two numbers are not
-  ordrered, they are <dfn>unordered</dfn>.
-</p>
-
-<div class="feature">
-<span class="category">(srfi 278)<br>procedure</span>
-<code class="signature">(<a href="#sign-negativep" id="sign-negativep"
-                         >sign-negative?</a> <var>x</var>)</code>
-</div>
-
-<p>
-  Returns <code>#t</code> if the number has a negative sign and
-  <code>#f</code> otherwise.
-</p>
-
-<p>
-  For non-NaN values, this procedure returns <code>#t</code> if the
-  number is less than zero, or if the number is negative zero. If the
-  value is a NaN, the returned boolean is implemetation-defined.
-</p>
-
-<div class="feature">
-<span class="category">(srfi 278)<br>procedure</span>
-<code class="signature">(<a href="#neqp" id="neqp"
-                         >!=</a> <var>x<sub>1</sub></var> <var>x<sub>2</sub></var> <var>x<sub>3</sub></var>…)</code>
-</div>
-
-<p>
-  Returns <code>#t</code> if there exists two arguments in the argument
-  list that are not equal.
-</p>
-
-<p>
-  This predicate is ordered: if any argument is a NaN, the
-  procedure returns false, even if all arguments are NaNs that are
-  <code>eqv?</code>.
-</p>
-
-<div class="feature">
-<span class="category">(srfi 278)<br>procedure</span>
-<code class="signature">(<a href="#nonnegativep" id="nonnegativep"
-                        >nonnegative?</a> <var>x</var>)</code><br>
-<code class="signature">(<a href="#nonpositivep" id="nonpositivep"
-                        >nonpositive?</a> <var>x</var>)</code><br>
-<code class="signature">(<a href="#nonzerop" id="nonzerop"
-                        >nonzero?</a> <var>z</var>)</code><br>
-</div>
-
-<p>
-  These procedures are order predicates around zero. They return
-  <code>#t</code> if the number <var>x</var> is an ordered number
-  that is not negative, not positive, and not zero respectively.
-  Definitions of these procedures could be
-</p>
-
-<pre
->(define (nonnegative? x)
-  (&gt;= x 0))
-(define (nonpositive? x)
-  (&lt;= x 0))
-(define (nonzero? x)
-  (!= x 0))</pre>
-
-<p>
-  These predicates are ordered: passing a NaN to these procedures always
-  returns false.
-</p>
 
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
@@ -679,6 +712,10 @@ SPDX-License-Identifier: MIT
 </p>
 </div>
 
+<h4 id="exact-integer-functions"><a
+href="#exact-integer-functions"></a>
+Functions returning exact integers</h4>
+
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
 <code class="signature">(<a href="#exact-integer-nth-root" id="exact-integer-nth-root"
@@ -716,6 +753,8 @@ It is an error if <var>k</var> is zero.</p>
 <pre
 ><code class="example-code">(exact-integer-log 8 2)</code> => 3 0
 <code class="example-code">(exact-integer-log 11 2)</code> => 3 3</pre>
+
+<h4 id="hyperbolic"><a href="#hyperbolic"></a> Hyperbolic functions</h4>
 
 <div class="feature">
 <span class="category">(srfi 278)<br>procedure</span>
