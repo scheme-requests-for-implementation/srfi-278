@@ -19,17 +19,19 @@
           sinh cosh tanh asinh acosh atanh
           conjugate rationalize round-away
           exact-integer-nth-root exact-integer-log)
+
   (cond-expand
     (chicken (import (chicken bitwise)))
     (else (import (srfi 151))))
   (cond-expand
-    ((or chicken (library (srfi 144)))  ; TODO: fix CHICKEN here
+    ((library (srfi 144))
      (import (only (srfi 144)
                    flonum
                    fl-greatest
                    fl-epsilon
                    fl-least
                    flnormalized?
+                   flcopysign
                    fladjacent
                    fl-pi/2
                    fl-pi/4
@@ -39,11 +41,7 @@
                    flsinh
                    flcosh
                    flatanh
-                   fllog1+))
-     (begin
-       (define fl-least-normal
-         (do ((candidate fl-least (* 2.0 candidate)))
-             ((flnormalized? candidate) candidate)))))
+                   fllog1+)))
     ;; If you don't have SRFI 144, you have to define the following
     ;; here:
     ;;
@@ -74,4 +72,11 @@
     ;; I would be very interested in any Schemes using non-standard
     ;; floating point formats.
 )
+  (cond-expand
+    (chicken (import (only (chicken base) exact-integer-nth-root)))
+    (else (include "278.exact-integer-nth-root.scm")))
+  ;; FIXME: STklos has this, so this should cond-expand and check for
+  ;; STklos.
+  (include "278.exact-integer-log.scm")
+
   (include "278.scm"))
