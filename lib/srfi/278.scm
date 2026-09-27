@@ -1,6 +1,10 @@
 ;;; SPDX-FileCopyrightText: 2026 Peter McGoron
 ;;; SPDX-License-Identifier: MIT
 
+(define fl-least-normal
+         (do ((candidate fl-least (* 2.0 candidate)))
+             ((flnormalized? candidate) candidate)))
+
 (define signed-zero?
   (not (eqv? +0.0 -0.0)))
 
@@ -185,11 +189,21 @@
        (library (srfi 276)))
    (define (casin z)
      (let ((x (real-part z))
-           (s:1-z (csqrt (- 1 z)))
-           (s:1+z (csqrt (+ 1 z))))
-       (make-rectangular (atan x (real-part (* s:1-z s:1+z)))
-                         (asinh (imag-part (* (conjugate s:1-z)
-                                              s:1+z)))))))
+           (y (imag-part z)))
+       (if (eqv? x 0)
+           (make-rectangular 0 (asinh (imag-part z)))  ; From gambit
+           (let* ((s:1-z (csqrt (- 1 z)))
+                  (s:1+z (csqrt (+ 1 z)))
+                  (x (real-part z))    ; ??? Chibi bug???
+                  (y (imag-part z))
+                  (rpart
+                   (if (and (infinite? x) (finite? y))
+                       (flcopysign fl-pi/2 x)
+                       (atan x (real-part (* s:1-z s:1+z)))))
+                  (ipart
+                   (asinh (imag-part (* (conjugate s:1-z)
+                                        s:1+z)))))
+             (make-rectangular rpart ipart))))))
   (else (define casin asin)))
 
 ;;; Kahan's algorithm can cope with all unsigned zeros, or all signed
@@ -204,7 +218,7 @@
 ;;; this.
 
 (cond-expand
-  (chicken-6
+  ((or chicken gauche)
    (define (*-i z)
      (make-rectangular (imag-part z)
                        (- (real-part z))))
@@ -226,7 +240,7 @@
           ((eqv? z 0) 0)
           ((real? z) (flasinh (flonum z)))
           (else
-           (let ((w (* -i (casin (* +i z))))
+           (let ((w (*-i (casin (*+i z))))
                  (x (real-part z))
                  (y (imag-part z)))
              (cond
@@ -234,7 +248,7 @@
                 (make-rectangular (* (sign x)        ; quadrant. The CCW rule
                                      (real-part w))  ; was applied, meaning
                                   (imag-part w)))    ; that we should flip
-               ; the sign.
+                                                     ; the sign.
                ((zero? y) w)
                (else                                 ; Third or fourth
                 (make-rectangular (* (sign x)        ; quadrant. We might
@@ -346,7 +360,7 @@
        (if (real? z)
            (* 1.0 (sign x))
            (let ((y*2 (* y 2))
-                 (cosh-x*2 (flcosh (* 2 x))))
+                 (cosh-x*2 (flcosh (* 2.0 x))))
              (cond
                ((finite? y*2)
                 (make-rectangular (* 1.0 (sign x))

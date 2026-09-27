@@ -11,17 +11,40 @@
         (srfi 278))
 
 (cond-expand
-  ((library (srfi 64))
-   (import (srfi 64)))
   (chicken-6
    (import (rename (test)
-                   (test %test))))
+                   (test test-equal))))
+  ((library (srfi 64))
+   (import (srfi 64)))
   (else (error "need a test suite")))
 
 (cond-expand
+  (chicken-6
+   (current-test-epsilon 0.01)
+   (define-syntax test-approximate
+     (syntax-rules ()
+       ((_ (something . rest) actual error)
+        (let ((value (something . rest)))
+          (test-equal value actual)))
+       ((_ expected actual error)
+        (test-equal expected actual))
+       ((_ name (something . rest) actual error)
+        (let ((value (something . rest)))
+          (test-equal name value actual)))
+       ((_ name expected actual error)
+        (test-equal name expected actual))))
+   (define-syntax skip-unless
+     (syntax-rules ()
+       ((_ test expr)
+        (when test expr))))
+   (define-syntax test-eqv
+     (syntax-rules ()
+       ((_ expected actual) (test-equal expected actual))
+       ((_ name expected actual) (test-equal name expected actual))))
+  )
   ((library (srfi 64))
    (define (test-exit)
-     (exit (+ (test-runner-pass-count the-test-runner)
+     (exit (+ (test-runner-fail-count the-test-runner)
               (test-runner-xpass-count the-test-runner))))
    (define-syntax skip-unless
      (syntax-rules ()
@@ -29,29 +52,7 @@
         (begin
           (unless test (test-skip 1))
           expr)))))
-  (chicken-6
-   (current-test-epsilon 0.01)
-   (define-syntax test-approximate
-     (syntax-rules ()
-       ((_ (something . rest) actual error)
-        (let ((value (something . rest)))
-          (%test value actual)))
-       ((_ expected actual error)
-        (%test expected actual))
-       ((_ name (something . rest) actual error)
-        (let ((value (something . rest)))
-          (%test name value actual)))
-       ((_ name expected actual error)
-        (%test name expected actual))))
-   (define-syntax skip-unless
-     (syntax-rules ()
-       ((_ test expr)
-        (when test expr))))
-   (define-syntax test-eqv
-     (syntax-rules ()
-       ((_ expected actual) (%test expected actual))
-       ((_ name expected actual) (%test name expected actual))))
-  ))
+  )
 
 (define signed-imaginary-zero?
   ;; Some tests discriminate based on the sign of the imaginary
@@ -228,20 +229,27 @@
   (test-eqv +i (conjugate -i)))
 
 (test-group "sinh"
-  (test-eqv 0 (sinh 0))
-  (test-eqv 0.0 (sinh 0.0))
-  (test-eqv -0.0 (sinh -0.0))
-  (test-eqv +inf.0 (sinh +inf.0))
-  (test-eqv -inf.0 (sinh -inf.0))
+  (test-eqv "(sinh 0)" 0 (sinh 0))
+  (test-eqv "(sinh 0.0)" 0.0 (sinh 0.0))
+  (test-eqv "(sinh -0.0)" -0.0 (sinh -0.0))
+  (test-eqv "(sinh +inf.0)" +inf.0 (sinh +inf.0))
+  (test-eqv "(sinh -inf.0)" -inf.0 (sinh -inf.0))
+  (test-eqv "(sinh 1e-30+1e-40i)"
+            1e-30+1e-40i
+            (sinh 1e-30+1e-40i))
   (test-approximate (/ (- (exp 1) (exp -1)) 2)
                     (sinh 1)
                     1e-6))
 
 (test-group "cosh"
-  (test-eqv 1 (cosh 0))
-  (test-eqv +inf.0 (cosh +inf.0))
-  (test-eqv +inf.0 (cosh -inf.0))
-  (test-approximate (/ (+ (exp 1) (exp -1)) 2)
+  (test-eqv "(cosh 0)" 1 (cosh 0))
+  (test-eqv "(cosh +inf.0)" +inf.0 (cosh +inf.0))
+  (test-eqv "(cosh -inf.0)" +inf.0 (cosh -inf.0))
+  (let ((v (cosh +i)))
+    (test-assert "(imag-part (cosh +i))" (= (imag-part v) 0))
+    (test-approximate "(real-part (cosh +i))" .5403023058681398 (real-part v) 1e-6))
+  (test-approximate "(cosh 1)"
+                    (/ (+ (exp 1) (exp -1)) 2)
                     (cosh 1)
                     1e-6))
 
@@ -251,6 +259,11 @@
   (test-eqv "(tanh -0.0)" -0.0 (tanh -0.0))
   (test-eqv "(tanh +inf.0)" 1.0 (tanh +inf.0))
   (test-eqv "(tanh -inf.0)" -1.0 (tanh -inf.0))
+  (test-eqv "(tanh 1e-30+1e-40i)"
+            1e-30+1e-40i
+            (tanh 1e-30+1e-40i))
+  (test-assert "(tanh 300+20i)" (nonzero? (imag-part (tanh 300+20i))))
+  (test-assert (rational? (imag-part (tanh 266.42844752772896+1.3482698511467367e308i))))
   (test-approximate (/ (sinh 10) (cosh 10))
                     (tanh 10)
                     1e-6))
@@ -270,6 +283,8 @@
      (test-assert (eqv? actual -0.0)))
     ((infinite? expect)
      (test-eqv expect actual))
+    ((nan? expect)
+     (test-assert (nan? actual)))
     (else (test-approximate expect actual error))))
 
 (define (test-real-and-imag z-expect z-actual)
@@ -353,6 +368,15 @@
                             0.-1.5707963267948966i
                             0.+1.5707963267948966i)
                         (acosh 0.0-0.0i)))
+  (test-group "(acosh 1.0+inf.0i)"
+    (test-real-and-imag +inf.0+1.5707963267948966i
+                        (acosh 1.0+inf.0i)))
+  (test-group "(acosh -inf.0+1.0i)"
+    (test-real-and-imag +inf.0+3.141592653589793i
+                        (acosh -inf.0+1.0i)))
+  (test-group "(acosh +inf.0+1.0i)"
+    (test-real-and-imag +inf.0+3.141592653589793i
+                        (acosh -inf.0+1.0i)))
   (test-group "(acosh -1+0.0i)"
     (test-real-and-imag 0.0+3.141592653589793i
                         (acosh -1+0.0i)))
@@ -384,6 +408,15 @@
     (let ((input (make-rectangular -0.0 -2.0)))
       (test-real-and-imag -1.3169578969248166-1.5707963267948966i
                           (asinh input))))
+  (test-group "(asinh +inf.0+2.0i)"
+    (test-real-and-imag +inf.0+0.0i
+                        (asinh +inf.0+2.0i)))
+  (test-group "(asinh +inf.0+inf.0i)"
+    (test-real-and-imag +inf.0+0.7853981633974483i
+                        (asinh +inf.0+inf.0i)))
+  (test-group "(asinh 2.0+nan.0i)"
+    (test-real-and-imag (make-rectangular +nan.0 +nan.0)
+                        (asinh (make-rectangular 2.0 +nan.0))))
   (test-group "(asinh +i)"
     (test-real-and-imag +1.5707963267948966i
                         (asinh +i)))
@@ -398,7 +431,8 @@
 (test-group "exact integer nth root"
   (let-values (((e i) (exact-integer-nth-root 40 3)))
     (test-equal 3 e)
-    (test-equal (- 40 27) i)))
+    (let ((expected (- 40 27)))
+      (test-equal expected i))))
 
 (test-group "exact integer log"
   (let-values (((e i) (exact-integer-log 8 2)))
@@ -409,7 +443,7 @@
     (test-equal 3 i)))
 
 (cond-expand
-  ((library (srfi 64))
+  ((and (not chicken) (library (srfi 64)))
    (define the-test-runner (test-runner-get)))
   (else))
 (test-end "SRFI 278")

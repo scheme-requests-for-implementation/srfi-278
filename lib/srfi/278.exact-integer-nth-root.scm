@@ -1,5 +1,6 @@
 ;;; SPDX-FileCopyrightText: 2000-2007 Felix L. Winkelmann
 ;;; SPDX-FileCopyrightText: 2007-2022 The CHICKEN Team
+;;; SPDX-FileCopyrightText: 2026 Peter McGoron
 ;;; SPDX-License-Identifier: BSD-3-Clause
 
 (define (exact-integer-nth-root k n)

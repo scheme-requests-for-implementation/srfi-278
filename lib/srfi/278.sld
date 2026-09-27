@@ -31,6 +31,7 @@
                    fl-epsilon
                    fl-least
                    flnormalized?
+                   flcopysign
                    fladjacent
                    fl-pi/2
                    fl-pi/4
@@ -40,11 +41,7 @@
                    flsinh
                    flcosh
                    flatanh
-                   fllog1+))
-     (begin
-       (define fl-least-normal
-         (do ((candidate fl-least (* 2.0 candidate)))
-             ((flnormalized? candidate) candidate)))))
+                   fllog1+)))
     ;; If you don't have SRFI 144, you have to define the following
     ;; here:
     ;;
